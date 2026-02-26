@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mine à Bitcoin</title>
+</head>
+<link rel="stylesheet" href="style.css">
+<body>
+
+<h1>Mine à Bitcoin</h1>
+
+<div id="scoreBoard">
+<div>Nombre de Bitcoin généré : <span id="score">0</span></div>
+<div>Nombre de Bitcoin obtenus : <span id="cpc">1</span></div>
+</div>
+
+<button id="clickButton">MINER DU BITCOIN</button>
+
+<button id="resetButton">RESET</button>
+
+<h2 style="margin-top:40px;">Boutique</h2>
+
+<div class="shop" id="shop"></div>
+
+<script>
+
+let score = parseInt(localStorage.getItem("score")) || 0
+let cpc = parseInt(localStorage.getItem("cpc")) || 1
+
+const scoreEl = document.getElementById("score")
+const cpcEl = document.getElementById("cpc")
+const button = document.getElementById("clickButton")
+
+function formatNumber(n){
+return n.toLocaleString("fr-FR")
+}
+
+function update(){
+
+scoreEl.textContent = formatNumber(score)
+cpcEl.textContent = formatNumber(cpc)
+
+localStorage.setItem("score",score)
+localStorage.setItem("cpc",cpc)
+
+updateShop()
+
+}
+
+const colors=[
+"#ff4d6d",
+"#ffbe0b",
+"#00f5d4",
+"#9b5de5",
+"#00bbf9",
+"#2ec4b6",
+"#ff9f1c",
+"#c77dff"
+]
+
+function effect(){
+
+const rect = button.getBoundingClientRect()
+
+const span = document.createElement("span")
+span.className="click-effect"
+
+span.style.color = colors[Math.floor(Math.random()*colors.length)]
+
+span.textContent="+"+formatNumber(cpc)
+
+span.style.left = Math.random()*(rect.width-40)+"px"
+span.style.top = Math.random()*(rect.height-40)+"px"
+
+button.appendChild(span)
+
+setTimeout(()=>{
+span.remove()
+},1200)
+
+}
+
+button.onclick=()=>{
+
+score+=cpc
+
+update()
+
+effect()
+
+}
+
+document.getElementById("resetButton").onclick=()=>{
+
+if(confirm("Reset la partie ?")){
+
+score=0
+cpc=1
+update()
+
+}
+
+}
+
+const upgrades=[
+
+{name:"Amélioration 1",desc:"+1 par clic pour 100 Bitcoin",cost:100,add:1,color:"color1"},
+{name:"Amélioration 2",desc:"+5 par clic pour 500 Bitcoin",cost:500,add:5,color:"color2"},
+{name:"Amélioration 3",desc:"+10 par clic pour 1000 Bitcoin",cost:1000,add:10,color:"color3"},
+{name:"Amélioration 4",desc:"+250 par clic pour 25.000 Bitcoin",cost:25000,add:250,color:"color4"},
+{name:"Amélioration 5",desc:"+5000 par clic pour 500.000 Bitcoin",cost:500000,add:5000,color:"color5"},
+{name:"Amélioration 6",desc:"+10.000 par clic pour 1.000.000 Bitcoin",cost:1000000,add:10000,color:"color6"},
+{name:"Amélioration 7",desc:"+100.000 par clic pour 10.000.000 Bitcoin",cost:10000000,add:100000,color:"color7"},
+{name:"Amélioration 8",desc:"+2.500.000 par clic pour 250 millions Bitcoin",cost:250000000,add:2500000,color:"color8"}
+
+]
+
+const shop=document.getElementById("shop")
+
+let buttons=[]
+
+upgrades.forEach((u,index)=>{
+
+const card=document.createElement("div")
+card.className="shop-card"
+
+card.innerHTML=`
+
+<div class="shop-title">${u.name}</div>
+<div class="shop-desc">${u.desc}</div>
+<button class="shop-btn ${u.color}">
+Acheter (${formatNumber(u.cost)})
+</button>
+
+`
+
+const btn = card.querySelector("button")
+
+btn.onclick=(e)=>{
+
+e.stopPropagation()
+
+if(score < u.cost) return
+
+score -= u.cost
+cpc += u.add
+
+update()
+
+}
+
+buttons.push({btn:btn,upgrade:u})
+
+shop.appendChild(card)
+
+})
+
+function updateShop(){
+
+buttons.forEach(item=>{
+
+if(score >= item.upgrade.cost){
+
+item.btn.classList.remove("disabled")
+
+}else{
+
+item.btn.classList.add("disabled")
+
+}
+
+})
+
+}
+
+update()
+
+</script>
+
+</body>
+</html>
