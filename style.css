@@ -21,11 +21,9 @@ body{
   min-height:100vh;
   transition:0.1s;
 }
-
 body.shake{
-  animation:shake 0.3s infinite;
+  animation:none;
 }
-
 @keyframes shake{
   0%{transform:translate(0,0);}
   25%{transform:translate(4px,-4px);}
@@ -39,6 +37,33 @@ h1{
   margin-bottom:15px;
   letter-spacing:1px;
   text-shadow:0 0 15px rgba(255,255,255,0.2);
+  text-align:center;
+  width:100%;
+}
+
+/* =========================
+   PSEUDO (NOUVEAU)
+========================= */
+#playerNameContainer{
+  position:fixed;
+  top:15px;
+  left:15px;
+  background:rgba(0,0,0,0.4);
+  padding:10px 15px;
+  border-radius:10px;
+  backdrop-filter:blur(6px);
+  box-shadow:0 0 10px rgba(0,0,0,0.5);
+  z-index:1000;
+}
+
+#playerNameInput{
+  background:#1f1f1f;
+  border:none;
+  outline:none;
+  color:white;
+  padding:6px 10px;
+  border-radius:6px;
+  width:140px;
 }
 
 /* =========================
@@ -160,120 +185,30 @@ h1{
     0 0 20px rgba(0,200,255,0.15);
 }
 
-.shop-title{
-  font-size:18px;
-  margin-bottom:8px;
-  font-weight:bold;
-}
-
-.shop-desc{
-  font-size:14px;
-  opacity:0.8;
-  margin-bottom:12px;
-}
-
-.shop-btn{
-  padding:10px;
-  border:none;
-  border-radius:8px;
-  font-size:15px;
-  cursor:pointer;
-  color:white;
-  transition:0.2s;
-}
-
-.shop-btn:hover{
-  filter:brightness(1.2);
-  transform:scale(1.05);
-}
-
-.shop-btn.disabled{
-  opacity:0.4;
-  cursor:not-allowed;
-  filter:grayscale(80%);
-}
-
 /* =========================
-   COULEURS
-========================= */
-.color1{background:linear-gradient(135deg,#ff0000,#ff5e5e);}
-.color2{background:linear-gradient(135deg,#ff7b00,#ffb347);}
-.color3{background:linear-gradient(135deg,#ffd000,#fff07a);}
-.color4{background:linear-gradient(135deg,#2ecc71,#7dffb3);}
-.color5{background:linear-gradient(135deg,#00c3ff,#7ee6ff);}
-.color6{background:linear-gradient(135deg,#0066ff,#7aa7ff);}
-.color7{background:linear-gradient(135deg,#8e44ad,#d29bff);}
-.color8{background:linear-gradient(135deg,#ff2da0,#ff8ad0);}
-
-/* =========================
-   EFFET GAIN
-========================= */
-.click-effect{
-  position:absolute;
-  font-weight:bold;
-  font-size:32px;
-  animation:pop 1.2s ease-out forwards;
-  pointer-events:none;
-  text-shadow:0 0 15px currentColor;
-}
-
-@keyframes pop{
-  0%{opacity:1; transform:translateY(0) scale(1);}
-  100%{opacity:0; transform:translateY(-160px) scale(2.3);}
-}
-
-/* =========================
-   LEADERBOARD
+   LEADERBOARD (RÉDUIT)
 ========================= */
 #leaderboard{
-  width:280px;
+  width:220px; /* plus petit */
   background:rgba(255,255,255,0.04);
   border-radius:18px;
-  padding:18px;
+  padding:12px;
   box-shadow:
     0 5px 20px rgba(0,0,0,0.6),
     inset 0 0 10px rgba(255,255,255,0.05);
   backdrop-filter:blur(6px);
+  font-size:13px; /* plus compact */
 }
 
 #leaderboardList{
-  margin-top:12px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  max-height:500px;
-  overflow-y:auto;
+  margin-top:10px;
+  gap:6px;
+  max-height:350px; /* plus petit */
 }
 
 .leaderboard-item{
-  display:flex;
-  justify-content:space-between;
-  font-size:14px;
-  background:#2a2a2a;
-  padding:8px 10px;
-  border-radius:8px;
-  transition:0.2s;
-}
-
-.leaderboard-item:hover{
-  background:#333;
-  transform:scale(1.02);
-}
-
-#refreshLeaderboard{
-  margin-top:12px;
-  padding:8px;
-  border:none;
-  border-radius:8px;
-  background:#3498db;
-  color:white;
-  cursor:pointer;
-  transition:0.2s;
-}
-
-#refreshLeaderboard:hover{
-  background:#4aa8ff;
-  box-shadow:0 0 15px rgba(52,152,219,0.7);
+  font-size:12px;
+  padding:6px 8px;
 }
 
 /* =========================
@@ -286,7 +221,7 @@ h1{
   }
   #leaderboard{
     width:100%;
-    max-width:400px;
+    max-width:320px;
   }
 }
 
