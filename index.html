@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mine à Bitcoin</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 </head>
 
 <body>
@@ -29,7 +35,7 @@
   </div>
 
   <div id="leaderboard">
-    <h2>Classement Top 100</h2>
+    <h2>Classement Top 100 (MONDIAL)</h2>
     <div id="leaderboardList"></div>
     <button id="refreshLeaderboard">Actualiser</button>
   </div>
@@ -37,21 +43,62 @@
 </div>
 
 <script>
+// ✅ TA CONFIG FIREBASE (déjà mise)
+const firebaseConfig = {
+  apiKey: "AIzaSyC1nJnq4XngAO8ClRtuG2qvuruZSPlwYHY",
+  authDomain: "clickers-8b8ed.firebaseapp.com",
+  projectId: "clickers-8b8ed",
+  storageBucket: "clickers-8b8ed.firebasestorage.app",
+  messagingSenderId: "407217480579",
+  appId: "1:407217480579:web:9a9d1770c40e01a4d20cb6"
+}
+
+firebase.initializeApp(firebaseConfig)
+const db = firebase.firestore()
+const auth = firebase.auth()
+
+auth.signInAnonymously()
+  .catch(error => {
+    console.error("Erreur Auth:", error)
+  })
+
 // VARIABLES
 let total = parseInt(localStorage.getItem("total")) || 0
 let cpc = parseInt(localStorage.getItem("cpc")) || 1
 
 let pseudo = localStorage.getItem("pseudo")
+
+async function askPseudo(){
+  while(true){
+    let input = prompt("Choisis un pseudo UNIQUE")
+
+    if(!input || input.length < 3){
+      alert("Pseudo trop court")
+      continue
+    }
+
+    input = input.toLowerCase().trim()
+
+    const doc = await db.collection("leaderboard").doc(input).get()
+
+    if(doc.exists){
+      alert("Pseudo déjà pris ❌")
+    } else {
+      pseudo = input
+      localStorage.setItem("pseudo", pseudo)
+      break
+    }
+  }
+}
+
 if(!pseudo){
-  pseudo = prompt("Entre ton pseudo pour le classement")
-  localStorage.setItem("pseudo", pseudo)
+  askPseudo()
 }
 
 const totalEl = document.getElementById("total")
 const cpcEl = document.getElementById("cpc")
 const button = document.getElementById("clickButton")
 
-// FORMAT NOMBRE
 function formatNumber(n){
   return n.toLocaleString("fr-FR")
 }
@@ -70,7 +117,7 @@ function effect(){
   setTimeout(()=>span.remove(),1200)
 }
 
-// CPS pour tremblement
+// CPS
 let clicks=[]
 function checkCPS(){
   let now = Date.now()
@@ -82,7 +129,7 @@ function checkCPS(){
   }
 }
 
-// CLIC SUR MINER
+// CLICK
 button.onclick = ()=>{
   total += cpc
   checkCPS()
@@ -99,7 +146,7 @@ document.getElementById("resetButton").onclick = ()=>{
   }
 }
 
-// AMELIORATIONS
+// SHOP
 const upgrades = [
   {name:"Amélioration 1",desc:"+1 par clic pour 100 Bitcoin",cost:100,add:1,color:"color1"},
   {name:"Amélioration 2",desc:"+5 par clic pour 500 Bitcoin",cost:500,add:5,color:"color2"},
@@ -136,7 +183,6 @@ upgrades.forEach(u=>{
   shop.appendChild(card)
 })
 
-// UPDATE SHOP
 function updateShop(){
   buttons.forEach(item=>{
     if(total >= item.upgrade.cost){
@@ -147,46 +193,53 @@ function updateShop(){
   })
 }
 
-// LEADERBOARD LOCAL (TOP 100)
+// 🌍 SAUVEGARDE MONDIALE
 function updateLeaderboard(){
-  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || []
-  let player = leaderboard.find(p=>p.name===pseudo)
-  if(player){
-    player.score = cpc
-  } else {
-    leaderboard.push({name:pseudo, score:cpc})
-  }
-  leaderboard.sort((a,b)=>b.score-a.score)
-  leaderboard = leaderboard.slice(0,100)
-  localStorage.setItem("leaderboard",JSON.stringify(leaderboard))
-  displayLeaderboard()
-}
-
-function displayLeaderboard(){
-  const list = document.getElementById("leaderboardList")
-  list.innerHTML=""
-  let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || []
-  leaderboard.forEach((p,i)=>{
-    const div = document.createElement("div")
-    div.className="leaderboard-item"
-    div.innerHTML = `<span>${i+1}. ${p.name}</span><span>${formatNumber(p.score)}</span>`
-    list.appendChild(div)
+  db.collection("leaderboard").doc(pseudo).set({
+    name:pseudo,
+    score:cpc
   })
 }
 
-// REFRESH BUTTON
-document.getElementById("refreshLeaderboard").onclick = updateLeaderboard
+// 🌍 AFFICHAGE MONDIAL
+function displayLeaderboard(){
+  const list = document.getElementById("leaderboardList")
+  list.innerHTML="Chargement..."
 
-// UPDATE INITIAL
+  db.collection("leaderboard")
+    .orderBy("score","desc")
+    .limit(100)
+    .get()
+    .then(snapshot=>{
+      list.innerHTML=""
+      let i=1
+      snapshot.forEach(doc=>{
+        const p = doc.data()
+        const div = document.createElement("div")
+        div.className="leaderboard-item"
+        div.innerHTML = `<span>${i}. ${p.name}</span><span>${formatNumber(p.score)}</span>`
+        list.appendChild(div)
+        i++
+      })
+    })
+}
+
+// REFRESH
+document.getElementById("refreshLeaderboard").onclick = displayLeaderboard
+
+// UPDATE
 function update(){
   totalEl.textContent = formatNumber(total)
   cpcEl.textContent = formatNumber(cpc)
+
   localStorage.setItem("total",total)
   localStorage.setItem("cpc",cpc)
+
   updateShop()
   updateLeaderboard()
 }
 
+// INIT
 update()
 displayLeaderboard()
 </script>
