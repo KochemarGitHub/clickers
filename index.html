@@ -15,6 +15,12 @@
 
 <body>
 
+<!-- ✅ PSEUDO EN HAUT À GAUCHE -->
+<div id="pseudoBox">
+  <span id="pseudoDisplay"></span>
+  <button id="changePseudo">✏️</button>
+</div>
+
 <h1>Mine à Bitcoin</h1>
 
 <div id="layout">
@@ -62,7 +68,19 @@ let total = parseInt(localStorage.getItem("total")) || 0
 let cpc = parseInt(localStorage.getItem("cpc")) || 1
 let pseudo = localStorage.getItem("pseudo")
 
-// AUTH + INIT
+// DOM
+const totalEl = document.getElementById("total")
+const cpcEl = document.getElementById("cpc")
+const button = document.getElementById("clickButton")
+
+const pseudoDisplay = document.getElementById("pseudoDisplay")
+const changePseudoBtn = document.getElementById("changePseudo")
+
+function formatNumber(n){
+  return n.toLocaleString("fr-FR")
+}
+
+// INIT
 async function init(){
   await auth.signInAnonymously()
 
@@ -70,10 +88,10 @@ async function init(){
     await askPseudo()
   }
 
+  updatePseudoUI()
   update()
   displayLeaderboard()
 }
-
 init()
 
 // PSEUDO UNIQUE
@@ -100,13 +118,34 @@ async function askPseudo(){
   }
 }
 
-// DOM
-const totalEl = document.getElementById("total")
-const cpcEl = document.getElementById("cpc")
-const button = document.getElementById("clickButton")
+// UPDATE UI PSEUDO
+function updatePseudoUI(){
+  pseudoDisplay.textContent = pseudo || "..."
+}
 
-function formatNumber(n){
-  return n.toLocaleString("fr-FR")
+// CHANGER PSEUDO
+changePseudoBtn.onclick = async () => {
+  let newPseudo = prompt("Nouveau pseudo ?")
+
+  if(!newPseudo || newPseudo.length < 3){
+    alert("Pseudo invalide")
+    return
+  }
+
+  newPseudo = newPseudo.toLowerCase().trim()
+
+  const doc = await db.collection("leaderboard").doc(newPseudo).get()
+
+  if(doc.exists){
+    alert("Pseudo déjà pris ❌")
+    return
+  }
+
+  pseudo = newPseudo
+  localStorage.setItem("pseudo", pseudo)
+
+  updatePseudoUI()
+  updateLeaderboard()
 }
 
 // EFFET CLIC
@@ -124,17 +163,12 @@ function effect(){
   setTimeout(()=>span.remove(),1200)
 }
 
-// ANTI SPAM CLIC
+// ✅ CPS SANS TREMBLEMENT
 let clicks=[]
 function checkCPS(){
   let now = Date.now()
   clicks.push(now)
   clicks = clicks.filter(t => now - t < 1000)
-
-  if(clicks.length > 15){
-    document.body.classList.add("shake")
-    setTimeout(()=>document.body.classList.remove("shake"),300)
-  }
 }
 
 // CLICK
@@ -156,7 +190,7 @@ document.getElementById("resetButton").onclick = ()=>{
   }
 }
 
-// SHOP (TES AMÉLIORATIONS INTACTES)
+// SHOP (INTOUCHÉ)
 const upgrades = [
   {name:"Amélioration 1",desc:"+1 par clic pour 100 Bitcoin",cost:100,add:1,color:"color1"},
   {name:"Amélioration 2",desc:"+5 par clic pour 500 Bitcoin",cost:500,add:5,color:"color2"},
