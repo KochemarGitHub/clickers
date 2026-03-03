@@ -5,24 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mine à Bitcoin</title>
 <link rel="stylesheet" href="style.css">
-
-<!-- FIREBASE -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
 </head>
 
 <body>
-
-<!-- ✅ PSEUDO EN HAUT À GAUCHE -->
-  <div id="playerNameContainer">
-  <input id="playerNameInput" placeholder="Ton pseudo">
-</div>
-<div id="pseudoBox">
-  <span id="pseudoDisplay"></span>
-  <button id="changePseudo">✏️</button>
-</div>
 
 <h1>Mine à Bitcoin</h1>
 
@@ -43,113 +28,28 @@
 
   </div>
 
-  <div id="leaderboard">
-    <h2>Classement Top 100 (MONDIAL)</h2>
-    <div id="leaderboardList"></div>
-    <button id="refreshLeaderboard">Actualiser</button>
-  </div>
-
 </div>
 
 <script>
-// FIREBASE CONFIG
-const firebaseConfig = {
-  apiKey: "AIzaSyC1nJnq4XngAO8ClRtuG2qvuruZSPlwYHY",
-  authDomain: "clickers-8b8ed.firebaseapp.com",
-  projectId: "clickers-8b8ed",
-  storageBucket: "clickers-8b8ed.firebasestorage.app",
-  messagingSenderId: "407217480579",
-  appId: "1:407217480579:web:9a9d1770c40e01a4d20cb6"
-}
 
-firebase.initializeApp(firebaseConfig)
-const db = firebase.firestore()
-const auth = firebase.auth()
-
-// VARIABLES
+// VARIABLES (SAUVEGARDE LOCALE)
 let total = parseInt(localStorage.getItem("total")) || 0
 let cpc = parseInt(localStorage.getItem("cpc")) || 1
-let pseudo = localStorage.getItem("pseudo")
 
 // DOM
 const totalEl = document.getElementById("total")
 const cpcEl = document.getElementById("cpc")
 const button = document.getElementById("clickButton")
 
-const pseudoDisplay = document.getElementById("pseudoDisplay")
-const changePseudoBtn = document.getElementById("changePseudo")
-
 function formatNumber(n){
   return n.toLocaleString("fr-FR")
 }
 
 // INIT
-async function init(){
-  await auth.signInAnonymously()
-
-  if(!pseudo){
-    await askPseudo()
-  }
-
-  updatePseudoUI()
+function init(){
   update()
-  displayLeaderboard()
 }
 init()
-
-// PSEUDO UNIQUE
-async function askPseudo(){
-  while(true){
-    let input = prompt("Choisis un pseudo UNIQUE")
-
-    if(!input || input.length < 3){
-      alert("Pseudo trop court")
-      continue
-    }
-
-    input = input.toLowerCase().trim()
-
-    const doc = await db.collection("leaderboard").doc(input).get()
-
-    if(doc.exists){
-      alert("Pseudo déjà pris ❌")
-    } else {
-      pseudo = input
-      localStorage.setItem("pseudo", pseudo)
-      break
-    }
-  }
-}
-
-// UPDATE UI PSEUDO
-function updatePseudoUI(){
-  pseudoDisplay.textContent = pseudo || "..."
-}
-
-// CHANGER PSEUDO
-changePseudoBtn.onclick = async () => {
-  let newPseudo = prompt("Nouveau pseudo ?")
-
-  if(!newPseudo || newPseudo.length < 3){
-    alert("Pseudo invalide")
-    return
-  }
-
-  newPseudo = newPseudo.toLowerCase().trim()
-
-  const doc = await db.collection("leaderboard").doc(newPseudo).get()
-
-  if(doc.exists){
-    alert("Pseudo déjà pris ❌")
-    return
-  }
-
-  pseudo = newPseudo
-  localStorage.setItem("pseudo", pseudo)
-
-  updatePseudoUI()
-  updateLeaderboard()
-}
 
 // EFFET CLIC
 const colors = ["#ff0000","#ff7b00","#ffd000","#2ecc71","#00c3ff","#0066ff","#8e44ad","#ff2da0"]
@@ -166,7 +66,7 @@ function effect(){
   setTimeout(()=>span.remove(),1200)
 }
 
-// ✅ CPS SANS TREMBLEMENT
+// CPS (optionnel mais conservé)
 let clicks=[]
 function checkCPS(){
   let now = Date.now()
@@ -176,8 +76,6 @@ function checkCPS(){
 
 // CLICK
 button.onclick = ()=>{
-  if(!pseudo) return
-
   total += cpc
   checkCPS()
   update()
@@ -193,7 +91,7 @@ document.getElementById("resetButton").onclick = ()=>{
   }
 }
 
-// SHOP (INTOUCHÉ)
+// SHOP
 const upgrades = [
   {name:"Amélioration 1",desc:"+1 par clic pour 100 Bitcoin",cost:100,add:1,color:"color1"},
   {name:"Amélioration 2",desc:"+5 par clic pour 500 Bitcoin",cost:500,add:5,color:"color2"},
@@ -244,43 +142,7 @@ function updateShop(){
   })
 }
 
-// LEADERBOARD
-function updateLeaderboard(){
-  if(!pseudo) return
-
-  db.collection("leaderboard").doc(pseudo).set({
-    name:pseudo,
-    score: Math.min(cpc, 1000000)
-  })
-}
-
-function displayLeaderboard(){
-  const list = document.getElementById("leaderboardList")
-  list.innerHTML="Chargement..."
-
-  db.collection("leaderboard")
-    .orderBy("score","desc")
-    .limit(100)
-    .get()
-    .then(snapshot=>{
-      list.innerHTML=""
-      let i=1
-
-      snapshot.forEach(doc=>{
-        const p = doc.data()
-        const div = document.createElement("div")
-        div.className="leaderboard-item"
-        div.innerHTML = `<span>${i}. ${p.name}</span><span>${formatNumber(p.score)}</span>`
-        list.appendChild(div)
-        i++
-      })
-    })
-}
-
-// REFRESH
-document.getElementById("refreshLeaderboard").onclick = displayLeaderboard
-
-// UPDATE
+// UPDATE GLOBAL
 function update(){
   totalEl.textContent = formatNumber(total)
   cpcEl.textContent = formatNumber(cpc)
@@ -289,8 +151,8 @@ function update(){
   localStorage.setItem("cpc",cpc)
 
   updateShop()
-  updateLeaderboard()
 }
+
 </script>
 
 </body>
