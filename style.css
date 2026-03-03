@@ -22,7 +22,7 @@ body{
   transition:0.1s;
 }
 
-/* 🔥 SHAKE FIX (moins violent + plus court) */
+/* SHAKE */
 body.shake{
   animation:shake 0.2s;
 }
@@ -36,7 +36,7 @@ body.shake{
 }
 
 /* =========================
-   TITRE CENTRÉ
+   TITRE
 ========================= */
 h1{
   font-size:clamp(28px,5vw,42px);
@@ -48,34 +48,13 @@ h1{
 }
 
 /* =========================
-   PSEUDO (HAUT GAUCHE)
-========================= */
-#playerNameContainer{
-  position:fixed;
-  top:15px;
-  left:15px;
-  z-index:1000;
-}
-
-#playerNameInput{
-  padding:8px 12px;
-  border-radius:10px;
-  border:none;
-  outline:none;
-  background:#2a2a2a;
-  color:white;
-  font-size:14px;
-  width:140px;
-}
-
-/* =========================
    LAYOUT
 ========================= */
 #layout{
   display:flex;
-  gap:30px; /* réduit */
+  gap:30px;
   width:100%;
-  max-width:1100px; /* réduit */
+  max-width:900px;
 }
 
 #gameArea{
@@ -250,76 +229,12 @@ h1{
 }
 
 /* =========================
-   LEADERBOARD (PLUS PETIT)
-========================= */
-#leaderboard{
-  width:220px; /* réduit */
-  background:rgba(255,255,255,0.04);
-  border-radius:18px;
-  padding:12px;
-  box-shadow:
-    0 5px 20px rgba(0,0,0,0.6),
-    inset 0 0 10px rgba(255,255,255,0.05);
-  backdrop-filter:blur(6px);
-}
-
-#leaderboard h2{
-  font-size:16px;
-  text-align:center;
-}
-
-#leaderboardList{
-  margin-top:10px;
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-  max-height:400px;
-  overflow-y:auto;
-}
-
-.leaderboard-item{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px; /* réduit */
-  background:#2a2a2a;
-  padding:6px 8px;
-  border-radius:6px;
-  transition:0.2s;
-}
-
-.leaderboard-item:hover{
-  background:#333;
-  transform:scale(1.02);
-}
-
-#refreshLeaderboard{
-  margin-top:10px;
-  padding:6px;
-  border:none;
-  border-radius:6px;
-  background:#3498db;
-  color:white;
-  cursor:pointer;
-  font-size:12px;
-  transition:0.2s;
-}
-
-#refreshLeaderboard:hover{
-  background:#4aa8ff;
-  box-shadow:0 0 10px rgba(52,152,219,0.7);
-}
-
-/* =========================
    RESPONSIVE
 ========================= */
 @media (max-width:900px){
   #layout{
     flex-direction:column;
     align-items:center;
-  }
-  #leaderboard{
-    width:100%;
-    max-width:350px;
   }
 }
 
